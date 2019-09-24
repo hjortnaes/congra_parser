@@ -2,6 +2,8 @@
 1	1	@_IDENTITY_SYMBOL_@	@_IDENTITY_SYMBOL_@	0.0
 1	2	DET	DET	0.0
 1	7	@_IDENTITY_SYMBOL_@	@_IDENTITY_SYMBOL_@	0.0
+2	7	@det	@det	1.0
+2	7	@nsubj	@nsubj	1.0
 2	3	@$@	@$@	0.0
 2	5	@$@	@$@	0.0
 3	4	@^@	@^@	0.0
