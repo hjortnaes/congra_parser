@@ -15,9 +15,6 @@ def read_graph(composed_graph_file):
     G.add_weighted_edges_from(edges)
     return G
 
-def run_min_span_tree():
-    pass
-
 def main():
     if __name__=="__main__":
 
@@ -29,8 +26,9 @@ def main():
         
         path = args.composed
 
-        read_graph(path)
-        
+        G = read_graph(path)
+        arbor = nx.minimum_spanning_arborescence(G, attr='weight')
+        nx.write_graphml(arbor, 'minimal_arb.graphml') 
 
 main()
 
