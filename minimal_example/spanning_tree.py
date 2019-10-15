@@ -1,87 +1,31 @@
-#!/usr/bin/env python3
 import argparse
-from collections import defaultdict, namedtuple
+import networkx as nx
+from collections import namedtuple
 
-
-def read_graph(composed_graph_file):
+def read_input(composed_graph_file):
     with open(composed_graph_file) as fo:
         composed = fo.readlines()
+    return composed
 
-    #Define arc object
-    Arc = namedtuple('Arc', ('tail', 'weight', 'head'))
+def read_graph(composed_graph_file):
+    composed = read_input(composed_graph_file)
 
-    #Asseble graph as a list of arcs
-    G = [Arc(int(line.split('\t')[0]), float(line.split('\t')[-1].strip()), int(line.split('\t')[1]))\
-            for line in composed[:-1]]
+    State = namedtuple('State', 'tail head char1 char2 weight')
 
-    print(G[-1].head)
-    return G
+    states = []
+    for line in composed[:-1]:
+        line = line.split('\t')
+        states.append(State(int(line[0]), int(line[1]), line[2], line[3], float(line[4])))
 
+    G = nx.DiGraph()
 
+    edges = [(s.tail, s.head, s.weight) for s in states]
+    nodes = list(set([s.tail for s in states]))
+    nodes.append(states[-1].head)
 
-def min_spanning_arborescence(arcs, sink):
-    print("ARCS: ",arcs)
-    good_arcs = []
-    quotient_map = {arc.tail: arc.tail for arc in arcs}
-    print(quotient_map)
-    quotient_map[sink] = sink
-    while True:
-        min_arc_by_tail_rep = {}
-        successor_rep = {}
-        for arc in arcs:
-            if arc.tail == sink:
-                continue
-            tail_rep = quotient_map[arc.tail]
-            head_rep = quotient_map[arc.head]
-            if tail_rep == head_rep:
-                continue
-            if tail_rep not in min_arc_by_tail_rep or min_arc_by_tail_rep[tail_rep].weight > arc.weight:
-                min_arc_by_tail_rep[tail_rep] = arc
-                successor_rep[tail_rep] = head_rep
-
-        cycle_reps = find_cycle(successor_rep, sink)
-
-        if cycle_reps is None:
-            good_arcs.extend(min_arc_by_tail_rep.values())
-            return spanning_arborescence(good_arcs, sink)
-        good_arcs.extend(min_arc_by_tail_rep[cycle_rep] for cycle_rep in cycle_reps)
-        cycle_rep_set = set(cycle_reps)
-        cycle_rep = cycle_rep_set.pop()
-        quotient_map = {node: cycle_rep if node_rep in cycle_rep_set else node_rep for node, node_rep in quotient_map.items()}
-
-
-def find_cycle(successor, sink):
-    visited = {sink}
-    for node in successor:
-        cycle = []
-        while node not in visited:
-            visited.add(node)
-            cycle.append(node)
-            node = successor[node]
-        if node in cycle:
-            return cycle[cycle.index(node):]
-    return None
-
-
-def spanning_arborescence(arcs, sink):
-    arcs_by_head = defaultdict(list)
-    for arc in arcs:
-        if arc.tail == sink:
-            continue
-        arcs_by_head[arc.head].append(arc)
-    solution_arc_by_tail = {}
-    stack = arcs_by_head[sink]
-    while stack:
-        arc = stack.pop()
-        if arc.tail in solution_arc_by_tail:
-            continue
-        solution_arc_by_tail[arc.tail] = arc
-        stack.extend(arcs_by_head[arc.tail])
-    return solution_arc_by_tail
-
-
-
-
+    G.add_nodes_from(nodes)
+    G.add_weighted_edges_from(edges)
+    return G, states
 
 def main():
     if __name__=="__main__":
@@ -91,11 +35,19 @@ def main():
         parser.add_argument('-o', '--output', help='path to the output file', default='stdout')
 
         args = parser.parse_args()
-
-        G = read_graph(args.composed)
-        #print(G)
-        Aborescence = min_spanning_arborescence(G, 0)
         
+        path = args.composed
+
+        inp = read_input(path)
+
+        G, states = read_graph(path)
+        arbor = nx.minimum_spanning_arborescence(G, attr='weight')
+        ## Print to att file states with matching sequences
+        initial_edges =  [(s.tail, s.head) for s in states]
+        att_graph = [states[initial_edges.index(e)] for e in arbor.edges if e in initial_edges]
+        with open('example_min_spanning.txt', 'w') as fo:
+            for s in att_graph:
+                fo.write(str(s.tail)+'\t'+str(s.head)+'\t'+s.char1+'\t'+s.char2+'\t'+str(s.weight)+'\n')
 
 main()
 
