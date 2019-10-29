@@ -3,11 +3,13 @@ from collections import Counter, namedtuple
 
 def print_freqs(freqs):
     with open('frequencies.csv', 'w') as f:
-        for t, c in freqs.most_common():
-            print(str(t) + '\t' + str(c), file=f)
+        for t, c in freqs.items():
+            print(str(t), file=f)
+            for k, v in c.most_common():
+                print('\t' + str(k) + ':\t' + str(v), file=f)
 
 #  (dep_POS, arc_label, head_POS)
-Arc = namedtuple('Arc', 'dep_POS, arc_label, head_POS')
+Arc = namedtuple('Arc', 'dep_POS, head_POS')
 
 # 1	From	from	ADP	IN	_	3	case	3:case	_
 # (index, word, lemma, pos, og_pos, ignore, head_index, arc_label, enhanced_label, ignore_2)
@@ -28,20 +30,23 @@ def extract_freqs(file):
 
     freqs = Counter()
 
+    arcs = {}
     for sentence in sentences:
-        arcs = []
         for c in sentence:
             # skip parataxis words
             if '.' in c.index:
                 continue
             try:
-                arcs.append(Arc(c.pos, c.arc_label, sentence[int(c.head_index)-1].pos))
+                arc = Arc(c.pos, sentence[int(c.head_index)-1].pos)
+                if not arc in arcs:
+                    arcs[arc] = []
+                arcs[arc].append(c.arc_label)
             except ValueError as e:
                 print(sentence)
                 print(e)
                 print(c)
-        freqs += Counter(arcs)
 
+    freqs = {k: Counter(v) for k, v in arcs.items()}
     return freqs
 
 if __name__== "__main__":
