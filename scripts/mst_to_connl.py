@@ -1,5 +1,6 @@
 from collections import namedtuple
 from nltk.stem import WordNetLemmatizer
+import re
 
 lemmatizer = WordNetLemmatizer()
 
