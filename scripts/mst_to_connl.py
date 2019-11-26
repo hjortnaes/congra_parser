@@ -3,7 +3,7 @@ from nltk.stem import WordNetLemmatizer
 
 lemmatizer = WordNetLemmatizer()
 
-def recreate_sent2(path, mst):
+def recreate_sent(path, mst):
     dependency = re.compile(r'@\w+')
     pos = re.compile(r'[A-Z]+')
     Word = namedtuple('Word', ['index', 'word', 'lem',\
