@@ -7,7 +7,6 @@ freqs = extract_freqs('../ud-treebanks-v2.4/UD_English-EWT/en_ewt-ud-train.conll
 for k, labels in freqs.items():
     rule = """0	1	@^@	@^@	0.0
 1	1	@_IDENTITY_SYMBOL_@	@_IDENTITY_SYMBOL_@	0.0
-1	8	@$@	@$@	0.0
 1	2	{dep}	{dep}	0.0""".format(dep=k.dep_POS)
     for arc_label, freq in labels.items():
         rule += "\n2	7	@{label}	@{label}	{val}".format(label=arc_label, val=freq)
